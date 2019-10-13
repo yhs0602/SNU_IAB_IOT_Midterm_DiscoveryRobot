@@ -13,7 +13,8 @@
 #include <WebSockets.h>
 #include <WebSocketsClient.h>
 #include <WebSocketsServer.h>
-#include <WiFi.h>
+//#include "WiFi.h
+  #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <WiFiClient.h>
 #include "canvas_htm.h"
@@ -21,14 +22,17 @@
 const char *ap_ssid     = "Esp32AP";
 const char *ap_password = "thereisnospoon";
 
-const char *ssid_AP_1 = "XXXXXXXXXX";
-const char *pwd_AP_1  = "xxxxxxxxxx";
+const char *ssid_AP_1 = "U+Net9ED3";
+const char *pwd_AP_1  = "6000160842";
 
 const char *ssid_AP_2 = "XXXXXXXXX";
 const char *pwd_AP_2  = "xxxxxxxxx";
 
 const char *ssid_AP_3 = "XXXXXXXXX";
 const char *pwd_AP_3  = "xxxxxxxxx";
+
+const char * ssid = "MYIOTDEV";
+const char * password = "pWpWpWpW";
 
 const int SIOD = 21; //SDA
 const int SIOC = 22; //SCL
