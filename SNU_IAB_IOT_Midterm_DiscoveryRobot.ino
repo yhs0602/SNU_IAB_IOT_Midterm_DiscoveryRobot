@@ -61,9 +61,9 @@ const int motor2PwmChannel = 294;
 const int motor1A = 39;       //흰선  
 const int motor1B = 25;
 const int motor1Enable = 36; //파란선
-const int motor2A =  30;
-const int motor2B = 29;
-const int motor2Enable = 31;  //31 30 29 검갈파 en A B
+const int motor2A =  5;
+const int motor2B = 18;
+const int motor2Enable = 19;  //31 30 29 검갈파 en A B
 
 #define BACK -1
 #define STOP 0
