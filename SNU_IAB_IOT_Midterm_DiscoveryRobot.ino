@@ -1,12 +1,15 @@
-//2019-13674 양현서
-//IOT 중간고사 과제
-
-
-//Part of this file is taken from Mudassar Tamboli's code.
-//OV7670을 제어하여 웹으로 스트리밍하는 파트의 코드는 Mudassar Tamoli가 작성한 것이며
-//Apache 라이선스로 배포되었습니다.
-//https://github.com/mudassar-tamboli/ESP32-OV7670-WebSocket-Camera/
-
+ /*
+ * IOT 중간고사 과제
+ * First commit: 2019-10-14
+ * Author: 2019-13674 양현서
+ * github link: https://github.com/KYHSGeekCode/SNU_IAB_IOT_Midterm_DiscoveryRobot
+ * License: Apache License 2.0 (LGPL for WebSockets.h, etc..)
+ * 
+ * Part of this file is taken from Mudassar Tamboli's code.
+ * OV7670을 제어하여 웹으로 스트리밍하는 파트의 코드는 Mudassar Tamoli가 작성한 것이며
+ * Apache 라이선스로 배포되었습니다.
+ * https://github.com/mudassar-tamboli/ESP32-OV7670-WebSocket-Camera/
+ */
 
 #include "OV7670.h"
 
@@ -43,17 +46,34 @@ const int HREF = 35;
 const int XCLK = 32;
 const int PCLK = 33;
 
-const int D0 = 27;
-const int D1 = 17;
-const int D2 = 16;
-const int D3 = 15;
-const int D4 = 14;
-const int D5 = 13;
-const int D6 = 12;
-const int D7 = 4;
+const int D0 = 27;////2;///24;//27;  10 안됨 파랑  A17 GPIO27
+const int D1 = 26;////27;//17; 빨강 그냥 17
+const int D2 = 4;////26;//16;  초록색 그냥 16
+const int D3 = 16;////25;//15;  9안됨 91011 -> 0 2 15 갈색 15그냥
+const int D4 = 14;    //노랑 A16  GPIO14
+const int D5 = 13;////13;   11안됨 회색 A14 GPIO13
+const int D6 = 12;////12;    빨강 A15 GPIO12
+const int D7 = 17;////15;///4; 주황 그냥 4번핀
 
-const int TFT_DC = 2;
-const int TFT_CS = 5;
+
+const int motor1PwmChannel = 293;
+const int motor2PwmChannel = 294;
+const int motor1A = 39;       //흰선  
+const int motor1B = 25;
+const int motor1Enable = 36; //파란선
+const int motor2A =  30;
+const int motor2B = 29;
+const int motor2Enable = 31;  //31 30 29 검갈파 en A B
+
+#define BACK -1
+#define STOP 0
+#define STRAIGHT 1
+#define TURNRIGHT 2
+#define TURNLEFT 3
+
+
+//const int TFT_DC = 2;
+//const int TFT_CS = 5;
 //DIN <- MOSI 23
 //CLK <- SCK 18
 
@@ -141,6 +161,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
   char canvas_Q_VGA[] = "canvas-Q-VGA";
   char canvas_QQ_VGA[] = "canvas-QQ-VGA";
   char canvas_QQQ_VGA[] = "canvas-QQQ-VGA";
+
+  char MOTOR_TURNRIGHT[] = "motor_turnright";
+  char MOTOR_TURNLEFT[] = "motor_turnleft";
+  char MOTOR_STRAIGHT[] = "motor_straight";
+  char MOTOR_STOP[] = "motor_stop";
+  char MOTOR_BACK[] = "motor_back";
+  
   char ipaddr[26] ;
   IPAddress localip;
   
@@ -183,6 +210,41 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
               webSocket.sendBIN(0, &end_flag, 1);
               camera = new OV7670(OV7670::Mode::VGA_RGB565, SIOD, SIOC, VSYNC, HREF, XCLK, PCLK, D0, D1, D2, D3, D4, D5, D6, D7);
         }
+      } else if (payloadlength == sizeof(MOTOR_STRAIGHT)-1) {
+        if (memcmp(MOTOR_STRAIGHT, payload, payloadlength) == 0) {
+              Serial.printf("Go straight");
+              webSocket.sendBIN(0, &end_flag, 1);
+              StartMove(STRAIGHT);
+              return;
+        }
+      } else if (payloadlength == sizeof(MOTOR_TURNLEFT)-1) {
+        if (memcmp(MOTOR_TURNLEFT, payload, payloadlength) == 0) {
+              Serial.printf("Turn left");
+              webSocket.sendBIN(0, &end_flag, 1);
+              StartMove(TURNLEFT);
+              return;
+        }
+      } else if (payloadlength == sizeof(MOTOR_TURNRIGHT)-1) {
+        if (memcmp(MOTOR_TURNRIGHT, payload, payloadlength) == 0) {
+              Serial.printf("Turn rignt");
+              webSocket.sendBIN(0, &end_flag, 1);
+              StartMove(TURNRIGHT);
+              return;
+        }
+      } else if (payloadlength == sizeof(MOTOR_STOP)-1) {
+        if (memcmp(MOTOR_TURNRIGHT, payload, payloadlength) == 0) {
+              Serial.printf("Stop motors");
+              webSocket.sendBIN(0, &end_flag, 1);
+              StartMove(STOP);
+              return;
+        }
+      } else if (payloadlength == sizeof(MOTOR_BACK)-1) {
+        if (memcmp(MOTOR_BACK, payload, payloadlength) == 0) {
+              Serial.printf("Move Backward");
+              webSocket.sendBIN(0, &end_flag, 1);
+              StartMove(BACK);
+              return;
+        }
       } 
 
       
@@ -213,6 +275,54 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
 
   }
 }
+
+void StartMove(int action)
+{
+  switch(action)
+  {
+    case STOP:
+     ledcWrite(motor1PwmChannel, 0);
+     ledcWrite(motor2PwmChannel, 0);
+     digitalWrite(motor1A,HIGH);
+     digitalWrite(motor1B,HIGH);
+     digitalWrite(motor2A,HIGH);
+     digitalWrite(motor2B,HIGH);
+     break;
+    case STRAIGHT:
+    ledcWrite(motor1PwmChannel, 250);
+    ledcWrite(motor2PwmChannel, 250);
+     digitalWrite(motor1A,HIGH);
+     digitalWrite(motor1B,LOW);
+     digitalWrite(motor2A,HIGH);
+     digitalWrite(motor2B,LOW);
+     break;
+    case TURNRIGHT:
+     ledcWrite(motor1PwmChannel, 250);
+     ledcWrite(motor2PwmChannel, 250);
+     digitalWrite(motor1A,HIGH);
+     digitalWrite(motor1B,LOW);
+     digitalWrite(motor2A,LOW);
+     digitalWrite(motor2B,HIGH);
+     break;
+    case TURNLEFT:
+    ledcWrite(motor1PwmChannel, 250);
+     ledcWrite(motor2PwmChannel, 250);
+     digitalWrite(motor1A,LOW);
+     digitalWrite(motor1B,HIGH);
+     digitalWrite(motor2A,HIGH);
+     digitalWrite(motor2B,LOW);
+     break;
+    case BACK:
+    ledcWrite(motor1PwmChannel, 250);
+     ledcWrite(motor2PwmChannel, 250);
+     digitalWrite(motor1A,LOW);
+     digitalWrite(motor1B,HIGH);
+     digitalWrite(motor2A,LOW);
+     digitalWrite(motor2B,HIGH);
+     break;
+  }
+}
+
 void initWifiStation() {
 
     WiFi.mode(WIFI_AP_STA);
@@ -257,11 +367,35 @@ void initWifiAP() {
     Serial.println(myIP);
 }
 
+void initMotors() {
+
+  pinMode(motor1Enable,OUTPUT);
+  pinMode(motor1A, OUTPUT);
+  pinMode(motor1B, OUTPUT);
+  pinMode(motor2Enable,OUTPUT);
+  pinMode(motor2A, OUTPUT);
+  pinMode(motor2B, OUTPUT);
+   const int freq = 30000;
+  const int resolution = 8;
+  ledcSetup(motor1PwmChannel, freq, resolution);
+  ledcSetup(motor2PwmChannel, freq, resolution);
+  
+  ledcAttachPin(motor1Enable, motor1PwmChannel);
+  ledcAttachPin(motor2Enable, motor2PwmChannel);
+  
+  ledcWrite(motor1PwmChannel, 0);
+  ledcWrite(motor2PwmChannel, 0);
+  digitalWrite(motor1A,HIGH);
+  digitalWrite(motor1B,HIGH);
+  digitalWrite(motor2A,HIGH);
+  digitalWrite(motor2B,HIGH);
+}
 
 void setup() {
   Serial.begin(115200);
   initWifiMulti();
   initWifiAP();
+  initMotors();
   startWebSocket();
   startWebServer();
 }

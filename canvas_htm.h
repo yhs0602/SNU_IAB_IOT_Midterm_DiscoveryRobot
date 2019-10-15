@@ -1,4 +1,5 @@
 /* Author : Mudassar Tamboli
+ *  Edited : 2019-13674 양현서
  * License : APACHE LICENSE
  * URL: https://github.com/mudassar-tamboli/ESP32-OV7670-WebSocket-Camera/blob/master/canvas_htm.h
  * DESC: 비디오 데이터를 웹 브라우저에 출력하는 HTML&JS 코드입니다.
