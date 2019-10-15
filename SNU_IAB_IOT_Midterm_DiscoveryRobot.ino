@@ -185,33 +185,38 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
       }
       break;
     case WStype_TEXT:                     // if new text data is received
-    if (payloadlength == sizeof(MOTOR_STRAIGHT)-1 && memcmp(MOTOR_STRAIGHT, payload, payloadlength) == 0) {
+    if(payload[0]!='n'){
+      Serial.print("payload:");
+      Serial.printf("%100s",payload);
+      Serial.println();
+    }
+    if ((payloadlength == sizeof(MOTOR_STRAIGHT)-1) && (memcmp(MOTOR_STRAIGHT, payload, payloadlength) == 0)) {
               Serial.printf("Go straight");
-              webSocket.sendBIN(0, &end_flag, 1);
+              //webSocket.sendBIN(0, &end_flag, 1);
               StartMove(STRAIGHT);
               return;
         }
-     else if (payloadlength == sizeof(MOTOR_TURNLEFT)-1 &&memcmp(MOTOR_TURNLEFT, payload, payloadlength) == 0) {
+     else if ((payloadlength == sizeof(MOTOR_TURNLEFT)-1) &&(memcmp(MOTOR_TURNLEFT, payload, payloadlength) == 0)) {
               Serial.printf("Turn left");
-              webSocket.sendBIN(0, &end_flag, 1);
+              //webSocket.sendBIN(0, &end_flag, 1);
               StartMove(TURNLEFT);
               return;
         }
-      else if (payloadlength == sizeof(MOTOR_TURNRIGHT)-1 && memcmp(MOTOR_TURNRIGHT, payload, payloadlength) == 0) {
+      else if ((payloadlength == sizeof(MOTOR_TURNRIGHT)-1) && (memcmp(MOTOR_TURNRIGHT, payload, payloadlength) == 0)) {
               Serial.printf("Turn right");
-              webSocket.sendBIN(0, &end_flag, 1);
+              //webSocket.sendBIN(0, &end_flag, 1);
               StartMove(TURNRIGHT);
               return;
         }
-      else if (payloadlength == sizeof(MOTOR_STOP)-1 && memcmp(MOTOR_STOP, payload, payloadlength) == 0) {
+      else if ((payloadlength == sizeof(MOTOR_STOP)-1) && (memcmp(MOTOR_STOP, payload, payloadlength) == 0)) {
               Serial.printf("Stop motors");
-              webSocket.sendBIN(0, &end_flag, 1);
+              //webSocket.sendBIN(0, &end_flag, 1);
               StartMove(STOP);
               return;
         }
-      else if (payloadlength == sizeof(MOTOR_BACK)-1 && memcmp(MOTOR_BACK, payload, payloadlength) == 0) {
+      else if ((payloadlength == sizeof(MOTOR_BACK)-1) && (memcmp(MOTOR_BACK, payload, payloadlength) == 0)) {
               Serial.printf("Move Backward");
-              webSocket.sendBIN(0, &end_flag, 1);
+              //webSocket.sendBIN(0, &end_flag, 1);
               StartMove(BACK);
               return;
         }
@@ -279,14 +284,17 @@ void StartMove(int action)
     case STOP:
      //ledcWrite(motor1PwmChannel, 0);
      //ledcWrite(motor2PwmChannel, 0);
-     digitalWrite(motor1A,HIGH);
-     digitalWrite(motor1B,HIGH);
-     digitalWrite(motor2A,HIGH);
-     digitalWrite(motor2B,HIGH);
+     digitalWrite(motor1Enable,LOW);
+     digitalWrite(motor2Enable,LOW);   
+//     digitalWrite(motor1B,HIGH);
+//     digitalWrite(motor2A,HIGH);
+//     digitalWrite(motor2B,HIGH);
      break;
     case STRAIGHT:
     //ledcWrite(motor1PwmChannel, 250);
     //ledcWrite(motor2PwmChannel, 250);
+    digitalWrite(motor1Enable,HIGH);
+     digitalWrite(motor2Enable,HIGH);
      digitalWrite(motor1A,HIGH);
      digitalWrite(motor1B,LOW);
      digitalWrite(motor2A,HIGH);
@@ -295,6 +303,8 @@ void StartMove(int action)
     case TURNRIGHT:
      //ledcWrite(motor1PwmChannel, 250);
      //ledcWrite(motor2PwmChannel, 250);
+    digitalWrite(motor1Enable,HIGH);
+     digitalWrite(motor2Enable,HIGH); 
      digitalWrite(motor1A,HIGH);
      digitalWrite(motor1B,LOW);
      digitalWrite(motor2A,LOW);
@@ -303,6 +313,8 @@ void StartMove(int action)
     case TURNLEFT:
     //ledcWrite(motor1PwmChannel, 250);
      //ledcWrite(motor2PwmChannel, 250);
+     digitalWrite(motor1Enable,HIGH);
+     digitalWrite(motor2Enable,HIGH);
      digitalWrite(motor1A,LOW);
      digitalWrite(motor1B,HIGH);
      digitalWrite(motor2A,HIGH);
@@ -311,6 +323,8 @@ void StartMove(int action)
     case BACK:
     ///ledcWrite(motor1PwmChannel, 250);
      //ledcWrite(motor2PwmChannel, 250);
+     digitalWrite(motor1Enable,HIGH);
+     digitalWrite(motor2Enable,HIGH);
      digitalWrite(motor1A,LOW);
      digitalWrite(motor1B,HIGH);
      digitalWrite(motor2A,LOW);
@@ -381,10 +395,12 @@ void initMotors() {
   
   //ledcWrite(motor1PwmChannel, 0);
   //ledcWrite(motor2PwmChannel, 0);
-  digitalWrite(motor1A,HIGH);
-  digitalWrite(motor1B,HIGH);
-  digitalWrite(motor2A,HIGH);
-  digitalWrite(motor2B,HIGH);
+  digitalWrite(motor1Enable,LOW);
+  digitalWrite(motor2Enable,LOW);
+  //digitalWrite(motor1A,HIGH);
+  //digitalWrite(motor1B,LOW);
+  //digitalWrite(motor2A,HIGH);
+  //digitalWrite(motor2B,LOW);
 }
 
 void setup() {
