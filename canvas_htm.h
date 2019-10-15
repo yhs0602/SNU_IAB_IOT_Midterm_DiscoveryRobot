@@ -228,6 +228,15 @@ static const char canvas_htm[] PROGMEM = "<!-- Author : Mudassar Tamboli -->\n"\
 "    ctx.putImageData(imgData, canvas.width, canvas.height);\n"\
 "    ws.send(canvasid);    \n"\
 "}\n"\
+"function moveMotor(direction) \n"\
+"{\n"\
+"    if (ws.readyState != 1) {\n"\
+"    //    alert(\"ws.readyState \" + ws.readyState);    \n"\
+"        return;      \n"\
+"    }\n"\
+" \n"\
+"   ws.send(direction);\n"\
+"}\n"\
 "\n"\
 "</script>\n"\
 "\n"\
@@ -318,6 +327,11 @@ static const char canvas_htm[] PROGMEM = "<!-- Author : Mudassar Tamboli -->\n"\
 "</table> \n"\
 "\n"\
 "\n"\
+"<button onclick=\"moveMotor(\'motor_straight\') \">GO STRAIGHT</button> \n"\
+"<button onclick=\"moveMotor(\'motor_stop\') \">STOP</button> \n"\
+"<button onclick=\"moveMotor(\'motor_turnright\') \">TURN RIGHT</button> \n"\
+"<button onclick=\"moveMotor(\'motor_turnleft\') \">TURN LEFT</button> \n"\
+"<button onclick=\"moveMotor(\'motor_back\') \">GO BACK</button> \n"\
 "</body>\n"\
 "</html>\n"\
 "\n";
