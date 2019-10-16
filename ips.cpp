@@ -23,7 +23,8 @@ int IPS::SearchAPs()
       Serial.print(WiFi.SSID(i));
       Serial.print(", RSSI:");
       Serial.print(WiFi.RSSI(i));
-      
+      Serial.print(", 1-meter RSSI:");
+      Serial.println(WiFi.
     }
 }
 

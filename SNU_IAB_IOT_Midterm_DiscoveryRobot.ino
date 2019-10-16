@@ -9,6 +9,7 @@
  * OV7670을 제어하여 웹으로 스트리밍하는 파트의 코드는 Mudassar Tamoli가 작성한 것이며
  * Apache 라이선스로 배포되었습니다.
  * https://github.com/mudassar-tamboli/ESP32-OV7670-WebSocket-Camera/
+ * 양현서(KYHSGeekCode)가 수정함 (디버그&모터 조종 기능 확장)
  */
 
 #include "OV7670.h"
@@ -16,7 +17,7 @@
 #include <WebSockets.h>
 #include <WebSocketsClient.h>
 #include <WebSocketsServer.h>
-//#include "WiFi.h
+//#include "WiFi.h// error: multiple libraries found://
   #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <WiFiClient.h>
@@ -28,14 +29,14 @@ const char *ap_password = "thereisnospoon";
 const char *ssid_AP_1 = "U+Net9ED3";
 const char *pwd_AP_1  = "6000160842";
 
-const char *ssid_AP_2 = "XXXXXXXXX";
-const char *pwd_AP_2  = "xxxxxxxxx";
+const char *ssid_AP_2 = "Engineering";
+const char *pwd_AP_2  = "snuiab123";
 
-const char *ssid_AP_3 = "XXXXXXXXX";
-const char *pwd_AP_3  = "xxxxxxxxx";
+const char *ssid_AP_3 = "KT_SNU";
+const char *pwd_AP_3  = NULL;
 
-const char * ssid = "MYIOTDEV";
-const char * password = "pWpWpWpW";
+const char * ssid = ssid_AP_1;
+const char * password = pwd_AP_1;
 
 const int SIOD = 21; //SDA
 const int SIOC = 22; //SCL
@@ -132,7 +133,7 @@ void serve() {
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println();
-            client.print(canvas_htm);
+            client.print(canvas_htm);     // canvas_htm.h에 있음
             client.println();
             break;
           } 
@@ -222,7 +223,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
               StartMove(BACK);
               return;
         }
-      
+      //이하 if nest는 페이로드 길이가 다 다를 때만 사용해야 한다. 안 그러면 버그 생긴다.
       else if (payloadlength == sizeof(canvas_QQQ_VGA)-1) {
         if (memcmp(canvas_QQQ_VGA, payload, payloadlength) == 0) {
               Serial.printf("canvas_QQQ_VGA");
@@ -277,6 +278,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
   }
 }
 
+//모터를 제어하여 움직이는 함수
 void StartMove(int action)
 {
   Serial.print("Move action=");
@@ -288,14 +290,15 @@ void StartMove(int action)
      //ledcWrite(motor2PwmChannel, 0);
      digitalWrite(motor1Enable,LOW);
      digitalWrite(motor2Enable,LOW);   
-//     digitalWrite(motor1B,HIGH);
-//     digitalWrite(motor2A,HIGH);
-//     digitalWrite(motor2B,HIGH);
+     digitalWrite(motor1A,LOW);
+     digitalWrite(motor1B,LOW);
+     digitalWrite(motor2A,LOW);
+     digitalWrite(motor2B,LOW);
      break;
     case STRAIGHT:
     //ledcWrite(motor1PwmChannel, 250);
     //ledcWrite(motor2PwmChannel, 250);
-    digitalWrite(motor1Enable,HIGH);
+     digitalWrite(motor1Enable,HIGH);
      digitalWrite(motor2Enable,HIGH);
      digitalWrite(motor1A,HIGH);
      digitalWrite(motor1B,LOW);
@@ -334,9 +337,8 @@ void StartMove(int action)
      break;
   }
 }
-
+/*
 void initWifiStation() {
-
     WiFi.mode(WIFI_AP_STA);
     WiFi.begin(ssid, password);    
     Serial.print("\nConnecting to WiFi");
@@ -350,10 +352,9 @@ void initWifiStation() {
     Serial.println(WiFi.localIP()); 
 
 }
-
+*/
 void initWifiMulti()
 {
-
     wifiMulti.addAP(ssid_AP_1, pwd_AP_1);
     wifiMulti.addAP(ssid_AP_2, pwd_AP_2);
     wifiMulti.addAP(ssid_AP_3, pwd_AP_3);

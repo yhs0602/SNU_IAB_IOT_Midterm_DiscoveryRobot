@@ -1,7 +1,7 @@
 /* Author : Mudassar Tamboli
  * License : APACHE LICENSE
  * URL: https://github.com/mudassar-tamboli/ESP32-OV7670-WebSocket-Camera/blob/master/OV7670.h
- * DESC: 카메라 모듈인 OV7670을 제어하는데 필요한 정의들을 담고 있습니다.
+ * DESC: 카메라 모듈인 OV7670을 제어하는데 필요한 I2C 제어에 대한 정의들을 담고 있습니다.
  */
 
 
