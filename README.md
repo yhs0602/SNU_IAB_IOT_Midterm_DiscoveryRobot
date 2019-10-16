@@ -24,6 +24,7 @@ These could not be implemented due to time limitations or lack of related knowle
 1. From now on, repeat `1.` to find itself's position, assuming that the APs are in fixed positions.
 
 **Problem: I could not find a way to retrieve the original transmission power of broadcasted APs**
+**AND it seems that there are NO simple ways to retrieve the original transmission power of broadcasted APs, and I cannot make the ESP32 board to hack the AP and add API in runtime. (Source : https://stackoverflow.com/a/58422150/8614565)**
 
 ## Supersonic sensors
 1. It helps the positioning process to be more accurate.
