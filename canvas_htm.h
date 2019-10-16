@@ -327,11 +327,11 @@ static const char canvas_htm[] PROGMEM = "<!-- Author : Mudassar Tamboli -->\n"\
 "</table> \n"\
 "\n"\
 "\n"\
-"<button onclick=\"moveMotor(\'motor_straight\') \">GO STRAIGHT</button> \n"\
+"<button onclick=\"moveMotor(\'motor_stop\'); moveMotor(\'motor_straight\') \">GO STRAIGHT</button> \n"\
 "<button onclick=\"moveMotor(\'motor_stop\') \">STOP</button> \n"\
-"<button onclick=\"moveMotor(\'motor_turnright\') \">TURN RIGHT</button> \n"\
-"<button onclick=\"moveMotor(\'motor_turnleft\') \">TURN LEFT</button> \n"\
-"<button onclick=\"moveMotor(\'motor_back\') \">GO BACK</button> \n"\
+"<button onclick=\"moveMotor(\'motor_stop\'); moveMotor(\'motor_turnright\') \">TURN RIGHT</button> \n"\
+"<button onclick=\"moveMotor(\'motor_stop\'); moveMotor(\'motor_turnleft\') \">TURN LEFT</button> \n"\
+"<button onclick=\"moveMotor(\'motor_stop\'); moveMotor(\'motor_back\') \">GO BACK</button> \n"\
 "</body>\n"\
 "</html>\n"\
 "\n";

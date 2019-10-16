@@ -58,9 +58,11 @@ const int D7 = 17;////15;///4; 주황 그냥 4번핀
 
 const int motor1PwmChannel = 293;
 const int motor2PwmChannel = 294;
+//새거
 const int motor1A = 39;       //흰선  
 const int motor1B = 25;
 const int motor1Enable = 36; //파란선
+//받은거
 const int motor2A =  5;
 const int motor2B = 18;
 const int motor2Enable = 19;  //31 30 29 검갈파 en A B
