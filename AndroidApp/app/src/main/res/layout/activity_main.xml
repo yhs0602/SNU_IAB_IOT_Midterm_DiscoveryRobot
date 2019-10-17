@@ -13,16 +13,73 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text="IP"
-        app:layout_constraintEnd_toStartOf="@id/button"
+        app:layout_constraintEnd_toStartOf="@id/buttonConnect"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/buttonConnect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:text="Connect"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/editTextIP"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.kyhsgeekcode.snu_iab_iot_controllerapp.WebsocketStreamVideoView
+        android:id="@+id/wsvideo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/buttonStraight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editTextIP"></com.kyhsgeekcode.snu_iab_iot_controllerapp.WebsocketStreamVideoView>
+
+    <Button
+        android:id="@+id/buttonStraight"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Straight"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonStop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wsvideo" />
+    <Button
+        android:id="@+id/buttonStop"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonBack"
+        app:layout_constraintStart_toEndOf="@id/buttonStraight"
+        app:layout_constraintTop_toBottomOf="@id/wsvideo" />
+    <Button
+        android:id="@+id/buttonBack"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonLeft"
+        app:layout_constraintStart_toEndOf="@id/buttonStop"
+        app:layout_constraintTop_toBottomOf="@id/wsvideo" />
+    <Button
+        android:id="@+id/buttonLeft"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Left"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonRight"
+        app:layout_constraintStart_toEndOf="@id/buttonBack"
+        app:layout_constraintTop_toBottomOf="@id/wsvideo" />
+
+    <Button
+        android:id="@+id/buttonRight"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/buttonLeft"
+        app:layout_constraintTop_toBottomOf="@id/wsvideo" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
