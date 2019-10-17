@@ -8,20 +8,20 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+
+import tech.gusavila92.websocketclient.WebSocketClient;
 
 /**
  * TODO: document your custom view class.
  */
 public class WebsocketStreamVideoView extends View {
-    private String mExampleString; // TODO: use a default from R.string...
-    private int mExampleColor = Color.RED; // TODO: use a default from R.color...
-    private float mExampleDimension = 0; // TODO: use a default from R.dimen...
-    private Drawable mExampleDrawable;
-
-    private TextPaint mTextPaint;
-    private float mTextWidth;
-    private float mTextHeight;
+    private static final String TAG = "WebSockVideoView";
 
     public WebsocketStreamVideoView(Context context) {
         super(context);
@@ -43,41 +43,14 @@ public class WebsocketStreamVideoView extends View {
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.WebsocketStreamVideoView, defStyle, 0);
 
-        mExampleString = a.getString(
-                R.styleable.WebsocketStreamVideoView_exampleString);
-        mExampleColor = a.getColor(
-                R.styleable.WebsocketStreamVideoView_exampleColor,
-                mExampleColor);
-        // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
-        // values that should fall on pixel boundaries.
-        mExampleDimension = a.getDimension(
-                R.styleable.WebsocketStreamVideoView_exampleDimension,
-                mExampleDimension);
-
-        if (a.hasValue(R.styleable.WebsocketStreamVideoView_exampleDrawable)) {
-            mExampleDrawable = a.getDrawable(
-                    R.styleable.WebsocketStreamVideoView_exampleDrawable);
-            mExampleDrawable.setCallback(this);
-        }
-
-        a.recycle();
-
         // Set up a default TextPaint object
-        mTextPaint = new TextPaint();
-        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setTextAlign(Paint.Align.LEFT);
 
         // Update TextPaint and text measurements from attributes
         invalidateTextPaintAndMeasurements();
     }
 
     private void invalidateTextPaintAndMeasurements() {
-        mTextPaint.setTextSize(mExampleDimension);
-        mTextPaint.setColor(mExampleColor);
-        mTextWidth = mTextPaint.measureText(mExampleString);
-
-        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
-        mTextHeight = fontMetrics.bottom;
+//        mTextHeight = fontMetrics.bottom;
     }
 
     @Override
@@ -95,95 +68,78 @@ public class WebsocketStreamVideoView extends View {
         int contentHeight = getHeight() - paddingTop - paddingBottom;
 
         // Draw the text.
-        canvas.drawText(mExampleString,
-                paddingLeft + (contentWidth - mTextWidth) / 2,
-                paddingTop + (contentHeight + mTextHeight) / 2,
-                mTextPaint);
+//        canvas.drawText(mExampleString,
+//                paddingLeft + (contentWidth - mTextWidth) / 2,
+//                paddingTop + (contentHeight + mTextHeight) / 2,
+//                mTextPaint);
+//
+//        // Draw the example drawable on top of the text.
+//        if (mExampleDrawable != null) {
+//            mExampleDrawable.setBounds(paddingLeft, paddingTop,
+//                    paddingLeft + contentWidth, paddingTop + contentHeight);
+//            mExampleDrawable.draw(canvas);
+//        }
+    }
 
-        // Draw the example drawable on top of the text.
-        if (mExampleDrawable != null) {
-            mExampleDrawable.setBounds(paddingLeft, paddingTop,
-                    paddingLeft + contentWidth, paddingTop + contentHeight);
-            mExampleDrawable.draw(canvas);
+    private WebSocketClient webSocketClient;
+
+    private void createWebSocketClient(String struri) {
+        URI uri;
+        try {
+            uri = new URI(struri);
         }
+        catch (URISyntaxException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        webSocketClient = new WebSocketClient(uri) {
+            @Override
+            public void onOpen() {
+                Log.v(TAG,"onOpen");
+                //webSocketClient.send("Hello, World!");
+            }
+
+            @Override
+            public void onTextReceived(String message) {
+                Log.v(TAG,"onTextReceived:"+message);
+            }
+
+            @Override
+            public void onBinaryReceived(byte[] data) {
+                Log.v(TAG,"onBinaryReceived:"+ Arrays.toString(data));
+            }
+
+            @Override
+            public void onPingReceived(byte[] data) {
+                Log.v(TAG,"onPingReceived:"+Arrays.toString(data));
+            }
+
+            @Override
+            public void onPongReceived(byte[] data) {
+                Log.v(TAG,"onPongReceived:"+Arrays.toString(data));
+            }
+
+            @Override
+            public void onException(Exception e) {
+                Log.e(TAG,e.getMessage());
+            }
+
+            @Override
+            public void onCloseReceived() {
+                Log.v(TAG,"onCloseReceived");
+            }
+        };
+
+        webSocketClient.setConnectTimeout(10000);
+        webSocketClient.setReadTimeout(60000);
+        //webSocketClient.addHeader("arduino", "http://developer.example.com");
+        webSocketClient.enableAutomaticReconnection(5000);
+        webSocketClient.connect();
     }
 
-    /**
-     * Gets the example string attribute value.
-     *
-     * @return The example string attribute value.
-     */
-    public String getExampleString() {
-        return mExampleString;
-    }
 
-    /**
-     * Sets the view's example string attribute value. In the example view, this string
-     * is the text to draw.
-     *
-     * @param exampleString The example string attribute value to use.
-     */
-    public void setExampleString(String exampleString) {
-        mExampleString = exampleString;
-        invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the example color attribute value.
-     *
-     * @return The example color attribute value.
-     */
-    public int getExampleColor() {
-        return mExampleColor;
-    }
-
-    /**
-     * Sets the view's example color attribute value. In the example view, this color
-     * is the font color.
-     *
-     * @param exampleColor The example color attribute value to use.
-     */
-    public void setExampleColor(int exampleColor) {
-        mExampleColor = exampleColor;
-        invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the example dimension attribute value.
-     *
-     * @return The example dimension attribute value.
-     */
-    public float getExampleDimension() {
-        return mExampleDimension;
-    }
-
-    /**
-     * Sets the view's example dimension attribute value. In the example view, this dimension
-     * is the font size.
-     *
-     * @param exampleDimension The example dimension attribute value to use.
-     */
-    public void setExampleDimension(float exampleDimension) {
-        mExampleDimension = exampleDimension;
-        invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the example drawable attribute value.
-     *
-     * @return The example drawable attribute value.
-     */
-    public Drawable getExampleDrawable() {
-        return mExampleDrawable;
-    }
-
-    /**
-     * Sets the view's example drawable attribute value. In the example view, this drawable is
-     * drawn above the text.
-     *
-     * @param exampleDrawable The example drawable attribute value to use.
-     */
-    public void setExampleDrawable(Drawable exampleDrawable) {
-        mExampleDrawable = exampleDrawable;
+    public void setUriStr(String uriStr) {
+        createWebSocketClient(uriStr);
     }
 }
