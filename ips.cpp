@@ -24,10 +24,11 @@ int IPS::SearchAPs()
       Serial.print(", RSSI:");
       Serial.print(WiFi.RSSI(i));
       Serial.print(", 1-meter RSSI:");
-      Serial.println(WiFi.
+      //Serial.println(WiFi.
     }
+    return 0;
 }
 
-bool IPS::getMyPosition(float x, float y, float z){
-  
+bool IPS::getMyPosition(float &x, float &y, float &z){
+  return false;
 }

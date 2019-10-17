@@ -19,6 +19,7 @@
 #include <WebSocketsServer.h>
 //#include "WiFi.h// error: multiple libraries found://
   #include <WiFi.h>
+  #include <esp_wifi.h>
 #include <WiFiMulti.h>
 #include <WiFiClient.h>
 #include "canvas_htm.h"
@@ -46,27 +47,27 @@ const int HREF = 35;
 
 const int XCLK = 32;
 const int PCLK = 33;
-
+//1716 -> 36 39
 const int D0 = 27;////2;///24;//27;  10 안됨 파랑  A17 GPIO27
 const int D1 = 26;////27;//17; 빨강 그냥 17
 const int D2 = 4;////26;//16;  초록색 그냥 16
-const int D3 = 16;////25;//15;  9안됨 91011 -> 0 2 15 갈색 15그냥
+const int D3 = 39;////25;//15;  9안됨 91011 -> 0 2 15 갈색 15그냥
 const int D4 = 14;    //노랑 A16  GPIO14
 const int D5 = 13;////13;   11안됨 회색 A14 GPIO13
 const int D6 = 12;////12;    빨강 A15 GPIO12
-const int D7 = 17;////15;///4; 주황 그냥 4번핀
+const int D7 = 36;////15;///4; 주황 그냥 4번핀
 
 
 const int motor1PwmChannel = 293;
 const int motor2PwmChannel = 294;
-//새거
-const int motor1A = 39;       //흰선  
-const int motor1B = 25;
-const int motor1Enable = 36; //파란선
+//새거 23, 8
+const int motor1A = 17;//23;//39;//23;//39;       //흰선    //left motor input 1
+const int motor1B =  16;//25; //36;//8;//36;//25;               //left motor input 2 DAC1
+const int motor1Enable = -1;//36; //파란선  //left motor enable
 //받은거
-const int motor2A =  5;
-const int motor2B = 18;
-const int motor2Enable = 19;  //31 30 29 검갈파 en A B
+const int motor2A =  19;//5;               //right motor Input 3 VSPI SS
+const int motor2B = 18;               //right motor Input 4 VSPI SCK
+const int motor2Enable = -1;//19;  //31 30 29 검갈파 en A B //rignt motor enable VSPI MISO
 
 #define BACK -1
 #define STOP 0
@@ -279,6 +280,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
 }
 
 //모터를 제어하여 움직이는 함수
+//오른쪽 바퀴 : Out3, out4
+// 2A, 2B를 High low: 오른쪽 바퀴 뒤로
+// 1A, 1B를 컨트롤 하려면
 void StartMove(int action)
 {
   Serial.print("Move action=");
@@ -288,52 +292,56 @@ void StartMove(int action)
     case STOP:
      //ledcWrite(motor1PwmChannel, 0);
      //ledcWrite(motor2PwmChannel, 0);
-     digitalWrite(motor1Enable,LOW);
-     digitalWrite(motor2Enable,LOW);   
+     //digitalWrite(motor1Enable,LOW);
+     //digitalWrite(motor2Enable,LOW);   
      digitalWrite(motor1A,LOW);
      digitalWrite(motor1B,LOW);
      digitalWrite(motor2A,LOW);
      digitalWrite(motor2B,LOW);
      break;
-    case STRAIGHT:
+    case STRAIGHT: //오른쪽 바퀴는  앞으로 가려 한다. 왼쪽 바퀴는 앞으로 가려한다.
     //ledcWrite(motor1PwmChannel, 250);
     //ledcWrite(motor2PwmChannel, 250);
-     digitalWrite(motor1Enable,HIGH);
-     digitalWrite(motor2Enable,HIGH);
+    // digitalWrite(motor1Enable,HIGH);
+    // digitalWrite(motor2Enable,HIGH);
      digitalWrite(motor1A,HIGH);
      digitalWrite(motor1B,LOW);
-     digitalWrite(motor2A,HIGH);
-     digitalWrite(motor2B,LOW);
+     digitalWrite(motor2A,LOW);
+     digitalWrite(motor2B,HIGH);
      break;
-    case TURNRIGHT:
+    case TURNRIGHT: // 양쪽 다 앞으로 가려 한다.
      //ledcWrite(motor1PwmChannel, 250);
      //ledcWrite(motor2PwmChannel, 250);
-    digitalWrite(motor1Enable,HIGH);
-     digitalWrite(motor2Enable,HIGH); 
+    //digitalWrite(motor1Enable,HIGH);
+    // digitalWrite(motor2Enable,HIGH); 
      digitalWrite(motor1A,HIGH);
-     digitalWrite(motor1B,LOW);
+     digitalWrite(motor1B,HIGH);
      digitalWrite(motor2A,LOW);
      digitalWrite(motor2B,HIGH);
      break;
-    case TURNLEFT:
+    case TURNLEFT:  //오른쪽 바퀴만 뒤로 가려 한다.
     //ledcWrite(motor1PwmChannel, 250);
      //ledcWrite(motor2PwmChannel, 250);
-     digitalWrite(motor1Enable,HIGH);
-     digitalWrite(motor2Enable,HIGH);
+    // digitalWrite(motor1Enable,HIGH);
+    // digitalWrite(motor2Enable,HIGH);
+     digitalWrite(motor1A,HIGH);
+     digitalWrite(motor1B,LOW);
+     digitalWrite(motor2A,HIGH);
+     digitalWrite(motor2B,LOW);
+     break;
+    case BACK:  //오른쪽 바퀴만 뒤로 가려 한다. 왼쪽 바퀴는 앞으로 가려 한다.
+      //LOW LOW는 정지시킨다.
+      //LOW HIGH는 정지시킨다.
+      //HIGH LOW는 앞으로 가게 한다.
+      //HIGH HIGH는 앞으로 가게 한다.
+    ///ledcWrite(motor1PwmChannel, 250);
+     //ledcWrite(motor2PwmChannel, 250);
+    // digitalWrite(motor1Enable,HIGH);
+    // digitalWrite(motor2Enable,HIGH);
      digitalWrite(motor1A,LOW);
      digitalWrite(motor1B,HIGH);
      digitalWrite(motor2A,HIGH);
      digitalWrite(motor2B,LOW);
-     break;
-    case BACK:
-    ///ledcWrite(motor1PwmChannel, 250);
-     //ledcWrite(motor2PwmChannel, 250);
-     digitalWrite(motor1Enable,HIGH);
-     digitalWrite(motor2Enable,HIGH);
-     digitalWrite(motor1A,LOW);
-     digitalWrite(motor1B,HIGH);
-     digitalWrite(motor2A,LOW);
-     digitalWrite(motor2B,HIGH);
      break;
   }
 }
@@ -382,10 +390,10 @@ void initWifiAP() {
 
 void initMotors() {
 
-  pinMode(motor1Enable,OUTPUT);
+  //pinMode(motor1Enable,OUTPUT);
   pinMode(motor1A, OUTPUT);
   pinMode(motor1B, OUTPUT);
-  pinMode(motor2Enable,OUTPUT);
+  //pinMode(motor2Enable,OUTPUT);
   pinMode(motor2A, OUTPUT);
   pinMode(motor2B, OUTPUT);
    const int freq = 30000;
@@ -398,19 +406,20 @@ void initMotors() {
   
   //ledcWrite(motor1PwmChannel, 0);
   //ledcWrite(motor2PwmChannel, 0);
-  digitalWrite(motor1Enable,LOW);
-  digitalWrite(motor2Enable,LOW);
-  //digitalWrite(motor1A,HIGH);
-  //digitalWrite(motor1B,LOW);
-  //digitalWrite(motor2A,HIGH);
-  //digitalWrite(motor2B,LOW);
+ // digitalWrite(motor1Enable,LOW);
+ // digitalWrite(motor2Enable,LOW);
+  digitalWrite(motor1A,LOW);
+  digitalWrite(motor1B,LOW);
+  digitalWrite(motor2A,LOW);
+  digitalWrite(motor2B,LOW);
 }
 
 void setup() {
   Serial.begin(115200);
+  initMotors();
+  esp_wifi_set_ps(WIFI_PS_NONE);
   initWifiMulti();
   initWifiAP();
-  initMotors();
   startWebSocket();
   startWebServer();
 }
