@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import java.net.URI;
@@ -15,18 +17,20 @@ import java.util.Arrays;
 
 import tech.gusavila92.websocketclient.WebSocketClient;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, RadioGroup.OnCheckedChangeListener {
     private static final String TAG = "IOT_Main";
     WebsocketStreamVideoView videoView;
     Button btStraight, btStop, btBack, btLeft, btRight;
     EditText etIP;
     Button btConnect;
+    RadioGroup rgResolution;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         etIP = findViewById(R.id.editTextIP);
-
+        rgResolution = findViewById(R.id.rgResolutions);
+        rgResolution.setOnCheckedChangeListener(this);
         btConnect = findViewById(R.id.buttonConnect);
         btConnect.setOnClickListener(this);
         videoView = findViewById(R.id.wsvideo);
@@ -52,8 +56,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 videoView.setUriStr(uriStr);
                 Toast.makeText(this, "Connected",Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.buttonStraight:
-                
+            default:
+                videoView.controlBot(id);
         }
+    }
+
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        videoView.setResolution(((String)((RadioButton)findViewById(checkedId)).getText()));
     }
 }
