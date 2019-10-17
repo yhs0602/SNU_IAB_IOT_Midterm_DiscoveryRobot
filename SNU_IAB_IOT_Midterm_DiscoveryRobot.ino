@@ -9,7 +9,7 @@
  * OV7670을 제어하여 웹으로 스트리밍하는 파트의 코드는 Mudassar Tamoli가 작성한 것이며
  * Apache 라이선스로 배포되었습니다.
  * https://github.com/mudassar-tamboli/ESP32-OV7670-WebSocket-Camera/
- * 양현서(KYHSGeekCode)가 수정함 (디버그&모터 조종 기능 확장)
+ * 양현서(KYHSGeekCode)가 수정함 (디버그&모터 조종 기능 추가)
  */
 
 #include "OV7670.h"
@@ -24,7 +24,7 @@
 #include <WiFiClient.h>
 #include "canvas_htm.h"
 
-const char *ap_ssid     = "Esp32AP";
+const char *ap_ssid     = "ESP32_DiscoverBot";
 const char *ap_password = "thereisnospoon";
 
 const char *ssid_AP_1 = "U+Net9ED3";
@@ -39,6 +39,7 @@ const char *pwd_AP_3  = NULL;
 const char * ssid = ssid_AP_1;
 const char * password = pwd_AP_1;
 
+//GPIO pin # for OV7670입니다.
 const int SIOD = 21; //SDA
 const int SIOC = 22; //SCL
 
@@ -47,6 +48,8 @@ const int HREF = 35;
 
 const int XCLK = 32;
 const int PCLK = 33;
+
+//카메라의 데이터 (8비트씩) 전송하는 버스 핀 배치. 최대한 Read Only pins를 우선적으로 소비합니다.
 //1716 -> 36 39
 const int D0 = 27;////2;///24;//27;  10 안됨 파랑  A17 GPIO27
 const int D1 = 26;////27;//17; 빨강 그냥 17
@@ -57,18 +60,21 @@ const int D5 = 13;////13;   11안됨 회색 A14 GPIO13
 const int D6 = 12;////12;    빨강 A15 GPIO12
 const int D7 = 36;////15;///4; 주황 그냥 4번핀
 
-
-const int motor1PwmChannel = 293;
-const int motor2PwmChannel = 294;
-//새거 23, 8
+//장치의 이동을 위한 모터  GPIO pin #.
+//Output pin이 부족하여 Enable핀은 HIGH로 묶어두었습니다.
+//const int motor1PwmChannel = 293;
+//const int motor2PwmChannel = 294;
+//34~39번 핀은 Read Only라 사용할 수 없었습니다.
+//새로 산 모터 23, 8
 const int motor1A = 17;//23;//39;//23;//39;       //흰선    //left motor input 1
 const int motor1B =  16;//25; //36;//8;//36;//25;               //left motor input 2 DAC1
 const int motor1Enable = -1;//36; //파란선  //left motor enable
-//받은거
+//받은 모터
 const int motor2A =  19;//5;               //right motor Input 3 VSPI SS
 const int motor2B = 18;               //right motor Input 4 VSPI SCK
 const int motor2Enable = -1;//19;  //31 30 29 검갈파 en A B //rignt motor enable VSPI MISO
 
+//모터 구동 컨트롤 코드
 #define BACK -1
 #define STOP 0
 #define STRAIGHT 1
@@ -189,7 +195,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
       }
       break;
     case WStype_TEXT:                     // if new text data is received
-    if(payload[0]!='n'){
+    if(payload[0]!='n'){          //next frame이 아닌 다른 페이로드를 로그찍는다.
       Serial.print("payload:");
       Serial.printf("%100s",payload);
       Serial.println();
@@ -282,7 +288,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t payloa
 //모터를 제어하여 움직이는 함수
 //오른쪽 바퀴 : Out3, out4
 // 2A, 2B를 High low: 오른쪽 바퀴 뒤로
-// 1A, 1B를 컨트롤 하려면
+// 1A, 1B -> 왼쪽 바퀴
+// 이론상으로는 좌회전, 우회전도 가능해야 하나, 부족한 구동력과 정지마찰로 인해 잘 되지 않는다.
 void StartMove(int action)
 {
   Serial.print("Move action=");
@@ -315,19 +322,19 @@ void StartMove(int action)
     //digitalWrite(motor1Enable,HIGH);
     // digitalWrite(motor2Enable,HIGH); 
      digitalWrite(motor1A,HIGH);
-     digitalWrite(motor1B,HIGH);
-     digitalWrite(motor2A,LOW);
-     digitalWrite(motor2B,HIGH);
+     digitalWrite(motor1B,LOW);
+     digitalWrite(motor2A,HIGH);
+     digitalWrite(motor2B,LOW);
      break;
     case TURNLEFT:  //오른쪽 바퀴만 뒤로 가려 한다.
     //ledcWrite(motor1PwmChannel, 250);
      //ledcWrite(motor2PwmChannel, 250);
     // digitalWrite(motor1Enable,HIGH);
     // digitalWrite(motor2Enable,HIGH);
-     digitalWrite(motor1A,HIGH);
-     digitalWrite(motor1B,LOW);
-     digitalWrite(motor2A,HIGH);
-     digitalWrite(motor2B,LOW);
+     digitalWrite(motor1A,LOW);
+     digitalWrite(motor1B,HIGH);
+     digitalWrite(motor2A,LOW);
+     digitalWrite(motor2B,HIGH);
      break;
     case BACK:  //오른쪽 바퀴만 뒤로 가려 한다. 왼쪽 바퀴는 앞으로 가려 한다.
       //LOW LOW는 정지시킨다.
@@ -417,6 +424,7 @@ void initMotors() {
 void setup() {
   Serial.begin(115200);
   initMotors();
+  // ESP32의 WiFi가 계속 휴면상태로 가는 것 같아 추가.
   esp_wifi_set_ps(WIFI_PS_NONE);
   initWifiMulti();
   initWifiAP();

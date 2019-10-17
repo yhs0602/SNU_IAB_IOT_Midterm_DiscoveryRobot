@@ -1,3 +1,9 @@
+/*
+ * @Author: 2019-13674 양현서 (KYHSGeekCode)
+ * To've-been Implementation of ips.h
+ * See: https://stackoverflow.com/a/58422150/8614565
+ */
+
 #include "ips.h"
 #include <WiFi.h>
 
